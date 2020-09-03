@@ -5,6 +5,7 @@ import com.svetikov.testkotlinwebflux.service.EmployerService
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.reactive.function.BodyInserter
 
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -33,22 +34,22 @@ class MyHandler(private val service: EmployerService) {
                 .body(employers, Employer::class.java)
     }
 
-    fun selectById(request: ServerRequest):Mono<ServerResponse>{
+    fun selectById(request: ServerRequest): Mono<ServerResponse> {
 
-        val employer:Mono<Employer> =service.getId(Integer.parseInt(request.pathVariable("id")))//
-        val notFound:Mono<ServerResponse> =ServerResponse.notFound().build()
-        println(employer.map { e-> print(e.toString()) })
+        val employer: Mono<Employer> = service.getId(Integer.parseInt(request.pathVariable("id")))//
+        val notFound: Mono<ServerResponse> = ServerResponse.notFound().build()
 
-        return employer.flatMap{e->
+
+        return employer.flatMap { e ->
             ServerResponse
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(e,Employer::class.java)
-                .switchIfEmpty (notFound)
-
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(e))
+                    .switchIfEmpty(notFound)
         }
 
     }
 
-
 }
+
+
